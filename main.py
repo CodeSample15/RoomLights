@@ -1,10 +1,6 @@
 from lights import LEDStrip
 from mqtt import MQTTClient
 
-def nightlight(strip: LEDStrip):
-    strip.speed = 0.1
-    strip.setColor(10, 10, 10)
-
 def main():
     print("Starting...")
     strip = LEDStrip()
@@ -13,7 +9,7 @@ def main():
     mqttClient = MQTTClient()
     mqttClient.register_action("on", lambda: strip.setColor(255, 255, 255))
     mqttClient.register_action("off", lambda: strip.setColor(0, 0, 0))
-    mqttClient.register_action("middle_night", nightlight)
+    mqttClient.register_action("middle", lambda: strip.setColor(20, 20, 20))
     mqttClient.start()
 
     print("Started!")
