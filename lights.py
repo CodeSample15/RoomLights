@@ -33,7 +33,7 @@ class LEDStrip:
 
         #start off as off
         for p in range(led_count):
-            self.strip.setPixelColor(p, Color(155,0,0))
+            self.strip.setPixelColor(p, Color(0,0,0))
         self.strip.show()
 
     def startAsyncUpdates(self):
@@ -55,12 +55,15 @@ class LEDStrip:
             # calculate color deltas
             if self.speed != 0:
                 for i in range(3):
-                    self.currentColor[i] = float(self.targetColor[i] - self.currentColor[i]) * self.speed
+                    if self.targetColor[i] - self.currentColor[i] <= 3:
+                        self.currentColor[i] = self.targetColor[i]
+                    else:
+                        self.currentColor[i] = float(self.targetColor[i] - self.currentColor[i]) * self.speed
             else:
                 self.currentColor = self.targetColor
 
             for p in range(self.LED_COUNT):
-                self.strip.setPixelColor(p, Color(self.currentColor[0], self.currentColor[1], self.currentColor[2]))
+                self.strip.setPixelColor(p, Color(int(self.currentColor[0]), int(self.currentColor[1]), int(self.currentColor[2])))
             self.strip.show()
             
             time.sleep(0.1)
