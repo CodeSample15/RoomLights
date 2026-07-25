@@ -17,11 +17,12 @@ class LEDStrip:
 
         #speed is how fast the lights will adjust to the target color
         #set this to zero for instant change
-        self.speed = 0 
+        self.speed = 0
         self.mode = LED_MODE_GRADIENT
 
         self.running = False
-        self.targetColor = (0, 0, 0)
+        self.currentColor = (0,0,0)
+        self.targetColor = (0,0,0)
         self.updateTask = None
 
         self.strip = Adafruit_NeoPixel(self.LED_COUNT, self.LED_PIN, self.LED_FREQ_HZ, self.LED_DMA, self.LED_INVERT, self.LED_BRIGHTNESS, self.LED_CHANNEL)
@@ -32,7 +33,12 @@ class LEDStrip:
             self.strip.setPixelColor(p, Color(0,0,0))
 
     def startAsyncUpdates(self):
-        self.updateTask = asyncio.run(self._asyncUpdates())
+        asyncio.run(self._asyncUpdates())
+        print("LED strip started!")
+
+    def stop(self):
+        self.running = False
+        print("Stopped LED strip")
 
     def setColor(self, r, g, b):
         self.targetColor = (r, g, b)
@@ -40,4 +46,13 @@ class LEDStrip:
     async def _asyncUpdates(self):
         self.running = True
         while self.running:
-            pass
+            # calculate color deltas
+            if self.speed != 0:
+                for i in range(3):
+                    self.currentColor[i] = float(self.targetColor[i] - self.currentColor[i]) * self.speed
+            else:
+                self.currentColor = self.targetColor
+
+            for p in range(self.LED_COUNT):
+                self.strip.setPixelColor(p, Color(self.currentColor[0], self.currentColor[1], self.currentColor[2]))
+            await asyncio.sleep(0.1)
