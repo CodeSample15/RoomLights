@@ -8,7 +8,7 @@ def main():
 
     mqttClient = MQTTClient()
     mqttClient.register_action("on", lambda: strip.setColor(255, 255, 255))
-    mqttClient.register_action("on", lambda: strip.setColor(0, 0, 0))
+    mqttClient.register_action("off", lambda: strip.setColor(0, 0, 0))
     mqttClient.start()
 
     print("Started!")
