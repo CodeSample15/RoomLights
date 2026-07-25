@@ -6,6 +6,11 @@ MQTT_SERVER_IP = "100.93.66.64"
 MQTT_SUBSCRIBE_TOPIC = "pico_commands"
 
 class MQTTClient:
+    def __init__(self):
+            self.mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+            self.mqttc.on_connect = self.mqtt_on_connect
+            self.mqttc.on_message = self.mqtt_on_message
+
     def mqtt_on_connect(self, client, userdata, flags, reason_code, properties):
         print(f"Connected with result code {reason_code}")
         client.subscribe(MQTT_SUBSCRIBE_TOPIC)
@@ -15,11 +20,6 @@ class MQTTClient:
         body = json.loads(str(msg.payload))
 
         self.actions.get(body['type'], lambda:None)()
-
-    def __init__(self):
-        self.mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
-        self.mqttc.on_connect = self.mqtt_on_connect
-        self.mqttc.on_message = self.mqtt_on_message
 
         self.actions = {}
 

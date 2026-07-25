@@ -1,5 +1,6 @@
 from rpi_ws281x import *
-import asyncio
+import threading
+import time
 
 #LED mode enum values
 LED_MODE_SOLID = 0
@@ -20,6 +21,8 @@ class LEDStrip:
         self.speed = 0
         self.mode = LED_MODE_GRADIENT
 
+        self.thread = threading.Thread(target=self._asyncUpdates)
+
         self.running = False
         self.currentColor = (0,0,0)
         self.targetColor = (0,0,0)
@@ -33,17 +36,18 @@ class LEDStrip:
             self.strip.setPixelColor(p, Color(0,0,0))
 
     def startAsyncUpdates(self):
-        asyncio.create_task(self._asyncUpdates())
+        self.thread.start()
         print("LED strip started!")
 
     def stop(self):
         self.running = False
+        self.thread.join()
         print("Stopped LED strip")
 
     def setColor(self, r, g, b):
         self.targetColor = (r, g, b)
 
-    async def _asyncUpdates(self):
+    def _asyncUpdates(self):
         self.running = True
         while self.running:
             # calculate color deltas
@@ -55,4 +59,5 @@ class LEDStrip:
 
             for p in range(self.LED_COUNT):
                 self.strip.setPixelColor(p, Color(self.currentColor[0], self.currentColor[1], self.currentColor[2]))
-            await asyncio.sleep(0.1)
+            
+            time.sleep(0.1)
