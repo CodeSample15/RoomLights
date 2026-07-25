@@ -10,6 +10,7 @@ class MQTTClient:
             self.mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
             self.mqttc.on_connect = self.mqtt_on_connect
             self.mqttc.on_message = self.mqtt_on_message
+            self.actions = {}
 
     def mqtt_on_connect(self, client, userdata, flags, reason_code, properties):
         print(f"Connected with result code {reason_code}")
@@ -20,8 +21,6 @@ class MQTTClient:
         body = json.loads(str(msg.payload))
 
         self.actions.get(body['type'], lambda:None)()
-
-        self.actions = {}
 
     def register_action(self, messageType, action):
         self.actions[messageType] = action
