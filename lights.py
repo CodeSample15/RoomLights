@@ -45,6 +45,7 @@ class LEDStrip:
         print("Stopped LED strip")
 
     def setColor(self, r, g, b):
+        print(f"LED strip: Color changed to {r} {g} {b}")
         self.targetColor = (r, g, b)
 
     def _asyncUpdates(self):
