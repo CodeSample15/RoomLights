@@ -60,5 +60,6 @@ class LEDStrip:
 
             for p in range(self.LED_COUNT):
                 self.strip.setPixelColor(p, Color(self.currentColor[0], self.currentColor[1], self.currentColor[2]))
+            self.strip.show()
             
             time.sleep(0.1)

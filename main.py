@@ -17,6 +17,7 @@ def main():
         try:
             pass
         except KeyboardInterrupt:
+            print("Stopping...")
             strip.stop()
             mqttClient.stop()
             break
