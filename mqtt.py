@@ -1,4 +1,5 @@
 import paho.mqtt.client as mqtt
+import codecs
 import json
 
 # HAH enjoy the hardcoded IP nerds, you can only access it through my tailnet
@@ -17,8 +18,8 @@ class MQTTClient:
         client.subscribe(MQTT_SUBSCRIBE_TOPIC)
 
     def mqtt_on_message(self, client, userdata, msg):
-        print(msg.topic+" "+str(msg.payload))
-        body = json.loads(str(msg.payload))
+        raw = msg.payload.decode("utf-8")
+        body = json.loads(raw[raw.index("{"):])
 
         self.actions.get(body['type'], lambda:None)()
 
@@ -32,3 +33,14 @@ class MQTTClient:
     def stop(self):
         self.mqttc.loop_stop()
         print("Stopped MQTT Client")
+
+if __name__=='__main__':
+    test = MQTTClient()
+    test.start()
+
+    while True:
+        try:
+            pass
+        except KeyboardInterrupt:
+            break
+    test.stop()
