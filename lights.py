@@ -7,7 +7,7 @@ LED_MODE_SOLID = 0
 LED_MODE_GRADIENT = 1
 
 class LEDStrip:
-    def __init__(self, led_count=300, led_pin=18, freq=800000, dma=10, brightness=255, invert=False, channel=0):
+    def __init__(self, led_count=300, led_pin=12, freq=800000, dma=10, brightness=255, invert=False, channel=0):
         self.LED_COUNT = led_count
         self.LED_PIN = led_pin
         self.LED_FREQ_HZ = freq
@@ -33,7 +33,8 @@ class LEDStrip:
 
         #start off as off
         for p in range(led_count):
-            self.strip.setPixelColor(p, Color(0,0,0))
+            self.strip.setPixelColor(p, Color(155,0,0))
+        self.strip.show()
 
     def startAsyncUpdates(self):
         self.thread.start()
