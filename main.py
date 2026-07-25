@@ -11,6 +11,8 @@ def main():
     mqttClient.register_action("on", lambda: strip.setColor(0, 0, 0))
     mqttClient.start()
 
+    print("Started!")
+
     while True:
         try:
             pass

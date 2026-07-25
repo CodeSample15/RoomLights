@@ -33,7 +33,7 @@ class LEDStrip:
             self.strip.setPixelColor(p, Color(0,0,0))
 
     def startAsyncUpdates(self):
-        asyncio.run(self._asyncUpdates())
+        asyncio.create_task(self._asyncUpdates())
         print("LED strip started!")
 
     def stop(self):
