@@ -46,7 +46,7 @@ class LEDStrip:
         print("Stopped LED strip")
 
     def setColor(self, r, g, b, speed=-1):
-        print(f"LED strip: Color changed to {r} {g} {b}")
+        print(f"LED strip: Color changed to ({r} {g} {b})")
         if speed >= 0:
             self.speed = speed
         self.targetColor = (r, g, b)
