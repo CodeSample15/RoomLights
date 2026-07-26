@@ -69,3 +69,6 @@ class LEDStrip:
             self.strip.show()
             
             time.sleep(0.1)
+
+if __name__=="__main__":
+    test=LEDStrip()
