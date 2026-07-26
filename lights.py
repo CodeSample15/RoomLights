@@ -33,11 +33,11 @@ class LEDStrip:
 
         #start off as off
         for p in range(led_count):
-            self.strip.setPixelColor(p, Color(0,0,0))
+            self.strip.setPixelColor(p, Color(255,0,0))
         self.strip.show()
 
     def startAsyncUpdates(self):
-        self.thread.start()
+        #self.thread.start()
         print("LED strip started!")
 
     def stop(self):
