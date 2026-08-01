@@ -17,11 +17,11 @@ class solidPattern:
     def reset():
         pass
     def setColor(red, green, blue):
-        r = red
-        g = green
-        b = blue
+        solidPattern.r = red
+        solidPattern.g = green
+        solidPattern.b = blue
     def at(x):
-        return r, g, b
+        return solidPattern.r, solidPattern.g, solidPattern.b
 
 class starsPattern:
     createStarTime = 0.055
