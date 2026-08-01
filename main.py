@@ -1,15 +1,21 @@
 from lights import LEDStrip
 from mqtt import MQTTClient
 
+import patterns
+
+def setSolidColor(strip, r, g, b, speed=-1):
+    patterns.solidPattern.setColor(r, g, b)
+    strip.setTargetPattern(patterns.solidPattern, speed=speed)
+
 def main():
     print("Starting...")
     strip = LEDStrip()
     strip.startAsyncUpdates()
 
     mqttClient = MQTTClient()
-    mqttClient.register_action("on", lambda: strip.setColor(255, 255, 255, speed=0))
-    mqttClient.register_action("off", lambda: strip.setColor(0, 0, 0, speed=0))
-    mqttClient.register_action("middle_night", lambda: strip.setColor(120, 64, 0, 0.1)) # night light
+    mqttClient.register_action("on", lambda: setSolidColor(strip, 255, 255, 255, 0.1))
+    mqttClient.register_action("off", lambda: strip.setTargetPattern(patterns.emptyPattern, speed=0.5))
+    mqttClient.register_action("middle_night", lambda: setSolidColor(strip, 120, 64, 0, 0.01)) # night light
     mqttClient.start()
 
     print("Started!")
