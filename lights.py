@@ -59,7 +59,7 @@ class LEDStrip:
             if self.speed != 0:
                 self.state += (target - self.state) * self.speed 
             else:
-                self.state = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)])
+                self.state = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)], dtype=float)
 
             for i, p in enumerate(self.state):
                 self.strip.setPixelColor(i, Color(int(p[0]), int(p[1]), int(p[2])))
