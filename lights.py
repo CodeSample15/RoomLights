@@ -23,7 +23,7 @@ class LEDStrip:
         self.thread = threading.Thread(target=self._asyncUpdates)
         self.running = False
 
-        self.state = np.zeros((led_count, 3), dtype=float)
+        self.state = np.zeros((led_count, 3), dtype=int)
         self.targetPattern = emptyPattern
 
         self.strip = Adafruit_NeoPixel(self.LED_COUNT, self.LED_PIN, self.LED_FREQ_HZ, self.LED_DMA, self.LED_INVERT, self.LED_BRIGHTNESS, self.LED_CHANNEL)
@@ -54,12 +54,12 @@ class LEDStrip:
     def _asyncUpdates(self):
         self.running = True
         while self.running:
-            target = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)], dtype=float)
+            target = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)], dtype=int)
 
             if self.speed != 0:
                 self.state += (target - self.state) * self.speed 
             else:
-                self.state = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)], dtype=float)
+                self.state = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)], dtype=int)
 
             for i, p in enumerate(self.state):
                 self.strip.setPixelColor(i, Color(int(p[0]), int(p[1]), int(p[2])))
