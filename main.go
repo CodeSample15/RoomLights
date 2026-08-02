@@ -23,6 +23,7 @@ func main() {
 		return
 	}
 
+	dev.Init()
 	defer dev.Fini()
 
 	color := uint32(0x0000ff)
