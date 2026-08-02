@@ -7,7 +7,7 @@ class emptyPattern:
     def reset(): # Used to reset any color changes
         pass
     def at(x):
-        return 0, 0, 0 # used to return the color for a specific pixel
+        return [0, 0, 0] # used to return the color for a specific pixel
 
 class solidPattern:
     r, g, b = 50, 50, 50
@@ -21,7 +21,7 @@ class solidPattern:
         solidPattern.g = green
         solidPattern.b = blue
     def at(x):
-        return solidPattern.r, solidPattern.g, solidPattern.b
+        return [solidPattern.r, solidPattern.g, solidPattern.b]
 
 class starsPattern:
     createStarTime = 0.055
@@ -41,6 +41,6 @@ class starsPattern:
         pass
 
     def at(x):
-        return 0,0,0
+        return [0,0,0]
 
 patterns = [starsPattern,]

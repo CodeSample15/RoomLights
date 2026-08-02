@@ -1,5 +1,8 @@
 from rpi_ws281x import *
 from patterns import emptyPattern
+
+import numpy as np
+
 import threading
 import time
 
@@ -20,6 +23,7 @@ class LEDStrip:
         self.thread = threading.Thread(target=self._asyncUpdates)
         self.running = False
 
+        self.state = np.zeros((led_count, 3), dtype=float)
         self.targetPattern = emptyPattern
 
         self.strip = Adafruit_NeoPixel(self.LED_COUNT, self.LED_PIN, self.LED_FREQ_HZ, self.LED_DMA, self.LED_INVERT, self.LED_BRIGHTNESS, self.LED_CHANNEL)
@@ -50,24 +54,15 @@ class LEDStrip:
     def _asyncUpdates(self):
         self.running = True
         while self.running:
-            for p in range(self.LED_COUNT):
-                r, g, b = self.targetPattern.at(p)
+            target = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)])
 
-                if self.speed != 0:
-                    # calculate color change
-                    currColor = self.strip.getPixelColorRGB(p)
-                    currColor = [currColor.r, currColor.g, currColor.b]
-                    targetColor = [r, g, b]
+            if self.speed != 0:
+                self.state += (target - self.state) * self.speed 
+            else:
+                self.state = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)])
 
-                    for i in range(3):
-                        if targetColor[i] - currColor[i] <= 3:
-                            currColor[i] = targetColor[i]
-                        else:
-                            currColor[i] += float(targetColor[i] - currColor[i]) * self.speed
-
-                    self.strip.setPixelColor(p, Color(int(currColor[0]), int(currColor[1]), int(currColor[2])))
-                else:
-                    self.strip.setPixelColor(p, Color(int(r), int(g), int(b)))
+            for p in self.state:
+                self.strip.setPixelColor(p, Color(int(p[0]), int(p[1]), int(p[2])))
 
             self.targetPattern.tick(self.strip)
             self.strip.show()
