@@ -54,7 +54,7 @@ class LEDStrip:
     def _asyncUpdates(self):
         self.running = True
         while self.running:
-            target = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)])
+            target = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)], dtype=float)
 
             if self.speed != 0:
                 self.state += (target - self.state) * self.speed 
