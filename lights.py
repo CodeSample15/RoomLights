@@ -61,8 +61,8 @@ class LEDStrip:
             else:
                 self.state = np.array([self.targetPattern.at(i) for i in range(self.LED_COUNT)])
 
-            for p in self.state:
-                self.strip.setPixelColor(p, Color(int(p[0]), int(p[1]), int(p[2])))
+            for i, p in enumerate(self.state):
+                self.strip.setPixelColor(i, Color(int(p[0]), int(p[1]), int(p[2])))
 
             self.targetPattern.tick(self.strip)
             self.strip.show()
