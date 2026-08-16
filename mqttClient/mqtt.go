@@ -30,7 +30,7 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
 	fmt.Printf("Recieved message: %s", string(msg.Payload()))
 
     var received message
-    err := json.Unmarshal(msg.Payload(), received)
+    err := json.Unmarshal(msg.Payload(), &received)
     if err == nil {
         fmt.Printf("Unmarshaled to: %s", received.Type)
     }

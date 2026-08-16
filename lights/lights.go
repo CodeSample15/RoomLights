@@ -66,7 +66,7 @@ func LedService(ctx context.Context, commands chan LedCommand, led Strip) {
 	var transitionSpeed float32
 	updateTick := time.Tick(50 * time.Millisecond)
 
-	targetPattern := offPattern
+	var targetPattern Pattern = &offPattern{}
 	state := make([]colorF, led.LedCount())
 
 mainLoop:

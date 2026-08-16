@@ -6,6 +6,8 @@ type Pattern interface {
 	get(x int) Color
 }
 
-var (
-	offPattern Pattern
-)
+type offPattern struct{}
+
+func (_ *offPattern) tick() {}
+func (_ *offPattern) reset(color Color) {}
+func (_ *offPattern) get(x int) Color { return Color{} }
