@@ -25,6 +25,10 @@ func main() {
 
 	fmt.Println("Starting LED service")
 	strip := lights.NewStrip(ledGpioPin, ledCount, 255)
+	if strip.LedCount() == 0 {
+		return
+	}
+
 	go lights.LedService(ctx, comChan, strip)
 
 	// Wait for interrupt signal to gracefully shutdown the subscriber
