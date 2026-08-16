@@ -2,7 +2,7 @@ package main
 
 import (
 	"main/lights"
-	"main/mqttclient"
+	"main/mqttClient"
 
 	"context"
 	"fmt"
