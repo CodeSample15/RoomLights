@@ -8,7 +8,7 @@ import (
 	ws2811 "github.com/rpi-ws281x/rpi-ws281x-go"
 )
 
-type Color struct {
+type color struct {
 	r uint8
 	g uint8
 	b uint8
@@ -21,8 +21,8 @@ type colorF struct {
 }
 
 type Strip interface {
-	SetColor(x int, c Color)
-	GetColor(x int) Color
+	SetColor(x int, c color)
+	GetColor(x int) color
 	LedCount() int
 	Render()
 	Close()
@@ -33,12 +33,16 @@ type strip struct {
 	ledCount int
 }
 
-type LedCommand struct {
-	lightPattern Pattern
-	transitionSpeed float32
-	reset bool
-	color Color
-}
+type LedCommand uint16
+
+const (
+	LedCommand_on LedCommand = 0
+	LedCommand_off LedCommand = 1
+	LedCommand_up LedCommand = 2
+	LedCommand_down LedCommand = 3
+	LedCommand_middle LedCommand = 4
+	LedCommand_middleNight LedCommand = 5
+)
 
 func NewStrip(pin int, ledCount int, brightness int) Strip {
 	opt := ws2811.DefaultOptions
@@ -75,11 +79,23 @@ mainLoop:
 		case <-ctx.Done():
 			break mainLoop
 		case com:=<-commands:
-			targetPattern = com.lightPattern
-			transitionSpeed = com.transitionSpeed
 			transition = 0
-			if com.reset {
-				targetPattern.reset(com.color)
+
+			switch com {
+			case LedCommand_on:
+				break
+			case LedCommand_off:
+				targetPattern = &offPattern{}
+				transitionSpeed = 0.1
+			case LedCommand_up:
+				break
+			case LedCommand_down:
+				break
+			case LedCommand_middle:
+				break
+			case LedCommand_middleNight:
+				targetPattern = &nightLight{}
+				transitionSpeed = 0.01
 			}
 		case <-updateTick:
 			targetPattern.tick()
@@ -104,12 +120,12 @@ mainLoop:
 	}
 }
 
-func (led *strip) SetColor(x int, c Color) {
+func (led *strip) SetColor(x int, c color) {
 	led.device.Leds(0)[x] = c.toInt()
 }
 
-func (led *strip) GetColor(x int) Color {
-	res := Color{}
+func (led *strip) GetColor(x int) color {
+	res := color{}
 	res.fromInt(led.device.Leds(0)[x])
 	return res
 }
@@ -126,28 +142,28 @@ func (led *strip) Close() {
 	led.device.Fini()
 }
 
-func (color *Color) fromInt(c uint32) {
-	color.b = uint8(c & 0xFF)
+func (col *color) fromInt(c uint32) {
+	col.b = uint8(c & 0xFF)
 	c >>= 8
-	color.g = uint8(c & 0xFF)
+	col.g = uint8(c & 0xFF)
 	c >>= 8
-	color.r = uint8(c & 0xFF)
+	col.r = uint8(c & 0xFF)
 }
 
-func (color *Color) toInt() uint32 {
-	return uint32(color.r) << 16 | uint32(color.g) << 8 | uint32(color.b)
+func (col *color) toInt() uint32 {
+	return uint32(col.r) << 16 | uint32(col.g) << 8 | uint32(col.b)
 }
 
-func (color *colorF) diff(other Color, speed float32) {
-	color.r += (float32(other.r) - color.r) * speed
-	color.g += (float32(other.g) - color.g) * speed
-	color.b += (float32(other.b) - color.b) * speed
+func (col *colorF) diff(other color, speed float32) {
+	col.r += (float32(other.r) - col.r) * speed
+	col.g += (float32(other.g) - col.g) * speed
+	col.b += (float32(other.b) - col.b) * speed
 }
 
-func (color *colorF) toColor() Color {
-	return Color{
-		r: uint8(color.r),
-		g: uint8(color.g),
-		b: uint8(color.b),
+func (col *colorF) toColor() color {
+	return color{
+		r: uint8(col.r),
+		g: uint8(col.g),
+		b: uint8(col.b),
 	}
 }

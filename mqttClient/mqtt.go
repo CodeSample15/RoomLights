@@ -31,6 +31,21 @@ var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Me
     err := json.Unmarshal(msg.Payload(), &received)
     if err == nil {
         fmt.Printf("Received pico command: %s\n", received.Type)
+
+        switch received.Type {
+        case "on":
+            commandChan<-lights.LedCommand_on
+        case "off":
+            commandChan<-lights.LedCommand_off
+        case "raise":
+            commandChan<-lights.LedCommand_up
+        case "lower":
+            commandChan<-lights.LedCommand_down
+        case "middle":
+            commandChan<-lights.LedCommand_middle
+        case "middle_night":
+            commandChan<-lights.LedCommand_middleNight
+        }
     }
 }
 
