@@ -118,6 +118,8 @@ mainLoop:
 			led.Render()
 		}
 	}
+
+	fmt.Println("LED service shutdown")
 }
 
 func (led *strip) SetColor(x int, c color) {
