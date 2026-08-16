@@ -27,12 +27,10 @@ var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
 }
 
 var messagePubHandler mqtt.MessageHandler = func(client mqtt.Client, msg mqtt.Message) {
-	fmt.Printf("Recieved message: %s", string(msg.Payload()))
-
     var received message
     err := json.Unmarshal(msg.Payload(), &received)
     if err == nil {
-        fmt.Printf("Unmarshaled to: %s", received.Type)
+        fmt.Printf("Received pico command: %s\n", received.Type)
     }
 }
 

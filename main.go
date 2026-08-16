@@ -3,6 +3,7 @@ package main
 import (
 	"main/lights"
 	"main/mqttClient"
+	"time"
 
 	"context"
 	"fmt"
@@ -31,10 +32,14 @@ func main() {
 
 	go lights.LedService(ctx, comChan, strip)
 
+	fmt.Println("Running")
+
 	// Wait for interrupt signal to gracefully shutdown the subscriber
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	<-sigChan
 
 	fmt.Println("Shutting down")
+
+	time.Sleep(500 * time.Millisecond)
 }
