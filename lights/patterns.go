@@ -6,10 +6,6 @@ type Pattern interface {
 	get(x int) Color
 }
 
-type pattern struct{
-	state []Color
-}
-
 var (
 	offPattern Pattern
 )
