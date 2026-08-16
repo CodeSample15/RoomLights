@@ -3,11 +3,13 @@ package lights
 type Pattern interface {
 	tick()
 	reset(color Color)
-	render(led *strip)
+	get(x int) Color
 }
 
 type pattern struct{
 	state []Color
 }
 
-type NightLight pattern
+var (
+	offPattern Pattern
+)
