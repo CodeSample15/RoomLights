@@ -43,13 +43,27 @@ const (
 	LedCommand_down        LedCommand = 3
 	LedCommand_middle      LedCommand = 4
 	LedCommand_middleNight LedCommand = 5
+
+	LED_COUNT = 300
 )
 
-func NewStrip(pin int, ledCount int, brightness int) Strip {
+var patterns []Pattern = []Pattern{
+	&sinWavePattern{
+		rate:  5,
+		state: make([]colorF, LED_COUNT),
+	},
+	&stars{
+		decayRate:       0.05,
+		backgroundColor: color{0, 30, 90},
+		state:           make([]colorF, LED_COUNT),
+	},
+}
+
+func NewStrip(pin int, brightness int) Strip {
 	opt := ws2811.DefaultOptions
 	opt.Channels[0].GpioPin = pin
 	opt.Channels[0].Brightness = brightness
-	opt.Channels[0].LedCount = ledCount
+	opt.Channels[0].LedCount = LED_COUNT
 
 	dev, err := ws2811.MakeWS2811(&opt)
 	if err != nil {
@@ -60,7 +74,7 @@ func NewStrip(pin int, ledCount int, brightness int) Strip {
 	dev.Init()
 	return &strip{
 		device:   dev,
-		ledCount: ledCount,
+		ledCount: LED_COUNT,
 	}
 }
 
@@ -71,6 +85,7 @@ func LedService(ctx context.Context, commands chan LedCommand, led Strip) {
 	updateTick := time.Tick(10 * time.Millisecond)
 
 	var targetPattern Pattern = &offPattern{}
+	patternIndex := 0
 	state := make([]colorF, led.LedCount())
 
 mainLoop:
@@ -81,23 +96,31 @@ mainLoop:
 		case com := <-commands:
 			switch com {
 			case LedCommand_on:
-				break
+				targetPattern = patterns[patternIndex]
+				transitionSpeed = 0.1
 			case LedCommand_off:
 				targetPattern = &offPattern{}
 				transitionSpeed = 0.1
 			case LedCommand_up:
-				targetPattern = &sinWavePattern{
-					rate:  5,
-					state: make([]colorF, led.LedCount()),
-				}
+				patternIndex += 1
+				targetPattern = patterns[patternIndex]
 				transitionSpeed = 0.1
 			case LedCommand_down:
-				break
+				patternIndex -= 1
+				targetPattern = patterns[patternIndex]
+				transitionSpeed = 0.1
 			case LedCommand_middle:
 				break
 			case LedCommand_middleNight:
 				targetPattern = &nightLight{}
 				transitionSpeed = 0.01
+			}
+
+			if patternIndex >= len(patterns) {
+				patternIndex = 0
+			}
+			if patternIndex < 0 {
+				patternIndex = len(patterns) - 1
 			}
 		case <-updateTick:
 			targetPattern.tick(led.LedCount())

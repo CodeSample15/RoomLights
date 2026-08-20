@@ -25,7 +25,7 @@ func main() {
 	comChan := mqttclient.StartMQTTClient(ctx)
 
 	fmt.Println("Starting LED service")
-	strip := lights.NewStrip(ledGpioPin, ledCount, 255)
+	strip := lights.NewStrip(ledGpioPin, 255)
 	if strip.LedCount() == 0 {
 		return
 	}

@@ -2,6 +2,8 @@ package lights
 
 import (
 	"math"
+	"math/rand"
+	"time"
 )
 
 type Pattern interface {
@@ -46,6 +48,33 @@ func (pat *sinWavePattern) tick(ledCount int) {
 	pat.offset += 0.04
 }
 
-func (_ *sinWavePattern) reset(col color) {}
-
+func (_ *sinWavePattern) reset(col color)   {}
 func (pat *sinWavePattern) get(x int) color { return pat.state[x].toColor() }
+
+// Twinkling star pattern
+type stars struct {
+	lastCreate   time.Time
+	createTimeMs time.Duration
+
+	decayRate       float32
+	backgroundColor color
+	state           []colorF
+}
+
+func (pat *stars) tick(ledCount int) {
+	if time.Since(pat.lastCreate) > pat.createTimeMs {
+		pat.lastCreate = time.Now()
+
+		pos := rand.Intn(ledCount)
+		pat.state[pos].g = 255
+		pat.state[pos].b = 220
+		pat.state[pos].r = 30
+	}
+
+	for i := range ledCount {
+		pat.state[i].diff(pat.backgroundColor, float64(pat.decayRate))
+	}
+}
+
+func (_ *stars) reset(col color)   {}
+func (pat *stars) get(x int) color { return pat.state[x].toColor() }
