@@ -41,7 +41,7 @@ func (pat *sinWavePattern) tick(ledCount int) {
 	for i := range ledCount {
 		red := math.Cos(float64(i)/pat.rate + pat.offset)
 		green := math.Sin((float64(ledCount-i)/pat.rate + pat.offset))
-		pat.state[i] = colorF{float32(red), float32(green), 30}
+		pat.state[i] = colorF{red, green, 30}
 	}
 	pat.offset += 0.04
 }

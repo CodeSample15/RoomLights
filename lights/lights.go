@@ -3,6 +3,7 @@ package lights
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	ws2811 "github.com/rpi-ws281x/rpi-ws281x-go"
@@ -15,9 +16,9 @@ type color struct {
 }
 
 type colorF struct {
-	r float32
-	g float32
-	b float32
+	r float64
+	g float64
+	b float64
 }
 
 type Strip interface {
@@ -66,8 +67,7 @@ func NewStrip(pin int, ledCount int, brightness int) Strip {
 func LedService(ctx context.Context, commands chan LedCommand, led Strip) {
 	defer led.Close()
 
-	var transition float32
-	var transitionSpeed float32
+	var transitionSpeed float64
 	updateTick := time.Tick(10 * time.Millisecond)
 
 	var targetPattern Pattern = &offPattern{}
@@ -79,8 +79,6 @@ mainLoop:
 		case <-ctx.Done():
 			break mainLoop
 		case com := <-commands:
-			transition = 0
-
 			switch com {
 			case LedCommand_on:
 				break
@@ -104,19 +102,16 @@ mainLoop:
 		case <-updateTick:
 			targetPattern.tick(led.LedCount())
 
-			if transition < 1 {
-				transition += transitionSpeed
-			} else {
-				transition = 1
-			}
-
 			for c := range led.LedCount() {
+				target := targetPattern.get(c)
+
 				if transitionSpeed == 0 {
-					led.SetColor(c, targetPattern.get(c))
+					state[c] = colorF{float64(target.r), float64(target.g), float64(target.b)}
 				} else {
-					state[c].diff(targetPattern.get(c), transitionSpeed)
-					led.SetColor(c, state[c].toColor())
+					state[c].diff(target, transitionSpeed)
 				}
+
+				led.SetColor(c, state[c].toColor())
 			}
 
 			led.Render()
@@ -160,16 +155,16 @@ func (col *color) toInt() uint32 {
 	return uint32(col.r)<<16 | uint32(col.g)<<8 | uint32(col.b)
 }
 
-func (col *colorF) diff(other color, speed float32) {
-	col.r += (float32(other.r) - col.r) * speed
-	col.g += (float32(other.g) - col.g) * speed
-	col.b += (float32(other.b) - col.b) * speed
+func (col *colorF) diff(other color, speed float64) {
+	col.r += (float64(other.r) - col.r) * speed
+	col.g += (float64(other.g) - col.g) * speed
+	col.b += (float64(other.b) - col.b) * speed
 }
 
 func (col *colorF) toColor() color {
 	return color{
-		r: uint8(col.r),
-		g: uint8(col.g),
-		b: uint8(col.b),
+		r: uint8(math.Max(0, math.Min(col.r, 255))),
+		g: uint8(math.Max(0, math.Min(col.g, 255))),
+		b: uint8(math.Max(0, math.Min(col.b, 255))),
 	}
 }
