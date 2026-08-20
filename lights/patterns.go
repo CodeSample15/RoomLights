@@ -66,9 +66,9 @@ func (pat *stars) tick(ledCount int) {
 		pat.lastCreate = time.Now()
 
 		pos := rand.Intn(ledCount)
-		pat.state[pos].g = 255
-		pat.state[pos].b = 220
-		pat.state[pos].r = 30
+		pat.state[pos].g = float64(randRange(240, 255))
+		pat.state[pos].b = float64(randRange(210, 250))
+		pat.state[pos].r = float64(randRange(0, 70))
 	}
 
 	for i := range ledCount {
@@ -78,3 +78,8 @@ func (pat *stars) tick(ledCount int) {
 
 func (_ *stars) reset(col color)   {}
 func (pat *stars) get(x int) color { return pat.state[x].toColor() }
+
+// HELPER FUNCTIONS
+func randRange(min int, max int) int {
+	return rand.Intn(max-min) + min
+}
