@@ -2,7 +2,7 @@ package main
 
 import (
 	"main/lights"
-	"main/mqttClient"
+	mqttclient "main/mqttClient"
 	"time"
 
 	"context"
@@ -14,7 +14,7 @@ import (
 
 const (
 	ledGpioPin = 12
-	ledCount = 300
+	ledCount   = 300
 )
 
 func main() {

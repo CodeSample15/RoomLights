@@ -29,18 +29,18 @@ type Strip interface {
 }
 
 type strip struct {
-	device *ws2811.WS2811
+	device   *ws2811.WS2811
 	ledCount int
 }
 
 type LedCommand uint16
 
 const (
-	LedCommand_on LedCommand = 0
-	LedCommand_off LedCommand = 1
-	LedCommand_up LedCommand = 2
-	LedCommand_down LedCommand = 3
-	LedCommand_middle LedCommand = 4
+	LedCommand_on          LedCommand = 0
+	LedCommand_off         LedCommand = 1
+	LedCommand_up          LedCommand = 2
+	LedCommand_down        LedCommand = 3
+	LedCommand_middle      LedCommand = 4
 	LedCommand_middleNight LedCommand = 5
 )
 
@@ -58,7 +58,7 @@ func NewStrip(pin int, ledCount int, brightness int) Strip {
 
 	dev.Init()
 	return &strip{
-		device: dev,
+		device:   dev,
 		ledCount: ledCount,
 	}
 }
@@ -78,7 +78,7 @@ mainLoop:
 		select {
 		case <-ctx.Done():
 			break mainLoop
-		case com:=<-commands:
+		case com := <-commands:
 			transition = 0
 
 			switch com {
@@ -106,7 +106,7 @@ mainLoop:
 				transition = 1
 			}
 
-			for c:=range led.LedCount() {
+			for c := range led.LedCount() {
 				if transitionSpeed == 0 {
 					led.SetColor(c, targetPattern.get(c))
 				} else {
@@ -153,7 +153,7 @@ func (col *color) fromInt(c uint32) {
 }
 
 func (col *color) toInt() uint32 {
-	return uint32(col.r) << 16 | uint32(col.g) << 8 | uint32(col.b)
+	return uint32(col.r)<<16 | uint32(col.g)<<8 | uint32(col.b)
 }
 
 func (col *colorF) diff(other color, speed float32) {
