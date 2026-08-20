@@ -66,9 +66,9 @@ func (pat *stars) tick(ledCount int) {
 		pat.lastCreate = time.Now()
 
 		pos := rand.Intn(ledCount)
-		pat.state[pos].g = float64(randRange(240, 255))
-		pat.state[pos].b = float64(randRange(210, 250))
-		pat.state[pos].r = float64(randRange(0, 70))
+		pat.state[pos].g = float64(randRange(100, 255))
+		pat.state[pos].b = float64(randRange(50, 250))
+		pat.state[pos].r = float64(randRange(0, 90))
 	}
 
 	for i := range ledCount {
