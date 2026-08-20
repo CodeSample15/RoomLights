@@ -53,7 +53,8 @@ var patterns []Pattern = []Pattern{
 		state: make([]colorF, LED_COUNT),
 	},
 	&stars{
-		decayRate:       0.05,
+		createTime:      100 * time.Millisecond,
+		decayRate:       0.005,
 		backgroundColor: color{0, 30, 90},
 		state:           make([]colorF, LED_COUNT),
 	},

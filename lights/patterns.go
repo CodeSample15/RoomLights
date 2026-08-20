@@ -53,16 +53,16 @@ func (pat *sinWavePattern) get(x int) color { return pat.state[x].toColor() }
 
 // Twinkling star pattern
 type stars struct {
-	lastCreate   time.Time
-	createTimeMs time.Duration
+	lastCreate time.Time
 
+	createTime      time.Duration
 	decayRate       float32
 	backgroundColor color
 	state           []colorF
 }
 
 func (pat *stars) tick(ledCount int) {
-	if time.Since(pat.lastCreate) > pat.createTimeMs {
+	if time.Since(pat.lastCreate) > pat.createTime {
 		pat.lastCreate = time.Now()
 
 		pos := rand.Intn(ledCount)
