@@ -88,17 +88,21 @@ mainLoop:
 				targetPattern = &offPattern{}
 				transitionSpeed = 0.1
 			case LedCommand_up:
-				break
+				targetPattern = &sinWavePattern{
+					rate:  5,
+					state: make([]colorF, led.LedCount()),
+				}
+				transitionSpeed = 0.1
 			case LedCommand_down:
 				break
 			case LedCommand_middle:
 				break
 			case LedCommand_middleNight:
 				targetPattern = &nightLight{}
-				transitionSpeed = 0.05
+				transitionSpeed = 0.01
 			}
 		case <-updateTick:
-			targetPattern.tick()
+			targetPattern.tick(led.LedCount())
 
 			if transition < 1 {
 				transition += transitionSpeed
