@@ -39,8 +39,8 @@ type sinWavePattern struct {
 
 func (pat *sinWavePattern) tick(ledCount int) {
 	for i := range ledCount {
-		red := math.Cos(float64(i)/pat.rate + pat.offset)
-		green := math.Sin((float64(ledCount-i)/pat.rate + pat.offset))
+		red := (math.Cos(float64(i)/pat.rate+pat.offset) + 1) / 2 * 255
+		green := (math.Sin((float64(ledCount-i)/pat.rate + pat.offset)) + 1) / 2 * 255
 		pat.state[i] = colorF{red, green, 30}
 	}
 	pat.offset += 0.04
