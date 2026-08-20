@@ -86,6 +86,7 @@ func LedService(ctx context.Context, commands chan LedCommand, led Strip) {
 
 	var targetPattern Pattern = &offPattern{}
 	patternIndex := 0
+	lightsOn := false
 	state := make([]colorF, led.LedCount())
 
 mainLoop:
@@ -98,29 +99,41 @@ mainLoop:
 			case LedCommand_on:
 				targetPattern = patterns[patternIndex]
 				transitionSpeed = 0.1
+				lightsOn = true
+
 			case LedCommand_off:
 				targetPattern = &offPattern{}
 				transitionSpeed = 0.1
+				lightsOn = false
+
 			case LedCommand_up:
 				patternIndex += 1
-				targetPattern = patterns[patternIndex]
-				transitionSpeed = 0.1
+				if patternIndex >= len(patterns) {
+					patternIndex = 0
+				}
+
+				if lightsOn {
+					targetPattern = patterns[patternIndex]
+					transitionSpeed = 0.1
+				}
+
 			case LedCommand_down:
 				patternIndex -= 1
-				targetPattern = patterns[patternIndex]
-				transitionSpeed = 0.1
+				if patternIndex < 0 {
+					patternIndex = len(patterns) - 1
+				}
+
+				if lightsOn {
+					targetPattern = patterns[patternIndex]
+					transitionSpeed = 0.1
+				}
+
 			case LedCommand_middle:
 				break
+
 			case LedCommand_middleNight:
 				targetPattern = &nightLight{}
 				transitionSpeed = 0.01
-			}
-
-			if patternIndex >= len(patterns) {
-				patternIndex = 0
-			}
-			if patternIndex < 0 {
-				patternIndex = len(patterns) - 1
 			}
 		case <-updateTick:
 			targetPattern.tick(led.LedCount())
