@@ -110,7 +110,12 @@ mainLoop:
 		case com := <-commands:
 			switch com {
 			case LedCommand_on:
-				targetPattern = patterns[patternIndex]
+				if patternMode {
+					targetPattern = patterns[patternIndex]
+				} else {
+					targetPattern = solidColors[colorIndex]
+				}
+
 				transitionSpeed = 0.1
 				lightsOn = true
 
