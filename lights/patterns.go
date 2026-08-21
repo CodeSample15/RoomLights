@@ -110,7 +110,7 @@ type rainbow struct {
 }
 
 func (pat *rainbow) tick(ledCount int) {
-	pat.offset += 0.5
+	pat.offset += 0.002
 }
 
 func (_ *rainbow) reset(col color) {}
