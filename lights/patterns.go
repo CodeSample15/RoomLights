@@ -116,13 +116,13 @@ func (pat *rainbow) tick(ledCount int) {
 func (_ *rainbow) reset(col color) {}
 
 func (pat *rainbow) get(x int) color {
-	sinR := math.Sin(float64(x) / 50)
+	sinR := math.Sin(float64(x)/50 + math.Pi/2)
 	sinR = (sinR + 1) / 2
 
-	sinG := math.Sin((float64(x) + math.Pi) / 50)
+	sinG := math.Sin(float64(x) / 50)
 	sinG = (sinG + 1) / 2
 
-	sinB := math.Sin((float64(x) + math.Pi*2) / 50)
+	sinB := math.Sin(float64(x)/50 + math.Pi)
 	sinB = (sinB + 1) / 2
 
 	c := colorF{
