@@ -180,6 +180,7 @@ mainLoop:
 				}
 
 			case LedCommand_middleNight:
+				patternMode = !patternMode
 				targetPattern = &nightLight{
 					nextPixelTime: 2 * time.Millisecond,
 				}
