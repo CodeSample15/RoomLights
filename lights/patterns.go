@@ -42,8 +42,8 @@ func (pat *nightLight) reset(col color) {
 func (pat *nightLight) get(x int) color {
 	if x < pat.currPixel {
 		return color{
-			r: 220,
-			g: 185,
+			r: 120,
+			g: 100,
 			b: 0,
 		}
 	}
