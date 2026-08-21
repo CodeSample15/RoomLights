@@ -19,6 +19,15 @@ func (_ *offPattern) tick(ledCount int) {}
 func (_ *offPattern) reset(col color)   {}
 func (_ *offPattern) get(x int) color   { return color{} }
 
+// Solid color pattern
+type solidColor struct {
+	col color
+}
+
+func (_ *solidColor) tick(ledCount int) {}
+func (pat *solidColor) reset(col color) { pat.col = col }
+func (pat *solidColor) get(x int) color { return pat.col }
+
 // Dim soft lighting for getting up late at night for bathroom
 type nightLight struct {
 	nextPixelTime time.Duration

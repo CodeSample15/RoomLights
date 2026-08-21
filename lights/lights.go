@@ -61,6 +61,15 @@ var patterns []Pattern = []Pattern{
 	&rainbow{},
 }
 
+var solidColors []Pattern = []Pattern{
+	&solidColor{color{220, 0, 127}},
+	&solidColor{color{127, 0, 124}},
+	&solidColor{color{0, 224, 213}},
+	&solidColor{color{6, 196, 60}},
+	&solidColor{color{133, 196, 6}},
+	&solidColor{color{196, 54, 6}},
+}
+
 func NewStrip(pin int, brightness int) Strip {
 	opt := ws2811.DefaultOptions
 	opt.Channels[0].GpioPin = pin
@@ -88,7 +97,9 @@ func LedService(ctx context.Context, commands chan LedCommand, led Strip) {
 
 	var targetPattern Pattern = &offPattern{}
 	patternIndex := 0
+	colorIndex := 0
 	lightsOn := false
+	patternMode := false
 	state := make([]colorF, led.LedCount())
 
 mainLoop:
@@ -110,36 +121,60 @@ mainLoop:
 				lightsOn = false
 
 			case LedCommand_up:
-				patternIndex += 1
-				if patternIndex >= len(patterns) {
-					patternIndex = 0
-				}
+				if patternMode {
+					patternIndex += 1
+					if patternIndex >= len(patterns) {
+						patternIndex = 0
+					}
 
-				if lightsOn {
-					targetPattern = patterns[patternIndex]
-					transitionSpeed = 0.1
+					if lightsOn {
+						targetPattern = patterns[patternIndex]
+						transitionSpeed = 0.1
+					}
+				} else {
+					colorIndex += 1
+					if colorIndex >= len(solidColors) {
+						colorIndex = 0
+					}
+
+					if lightsOn {
+						targetPattern = solidColors[colorIndex]
+						transitionSpeed = 0.1
+					}
 				}
 
 			case LedCommand_down:
-				patternIndex -= 1
-				if patternIndex < 0 {
-					patternIndex = len(patterns) - 1
-				}
+				if patternMode {
+					patternIndex -= 1
+					if patternIndex < 0 {
+						patternIndex = len(patterns) - 1
+					}
 
-				if lightsOn {
-					targetPattern = patterns[patternIndex]
-					transitionSpeed = 0.1
+					if lightsOn {
+						targetPattern = patterns[patternIndex]
+						transitionSpeed = 0.1
+					}
+				} else {
+					colorIndex -= 1
+					if colorIndex < 0 {
+						colorIndex = len(solidColors) - 1
+					}
+
+					if lightsOn {
+						targetPattern = solidColors[colorIndex]
+						transitionSpeed = 0.1
+					}
 				}
 
 			case LedCommand_middle:
-				break
+				patternMode = !patternMode
 
 			case LedCommand_middleNight:
 				targetPattern = &nightLight{
-					nextPixelTime: 5 * time.Millisecond,
+					nextPixelTime: 2 * time.Millisecond,
 				}
 				targetPattern.reset(color{})
-				transitionSpeed = 0.01
+				transitionSpeed = 0.08
 			}
 		case <-updateTick:
 			targetPattern.tick(led.LedCount())
