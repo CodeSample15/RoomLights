@@ -173,6 +173,11 @@ mainLoop:
 
 			case LedCommand_middle:
 				patternMode = !patternMode
+				if patternMode {
+					targetPattern = patterns[patternIndex]
+				} else {
+					targetPattern = solidColors[colorIndex]
+				}
 
 			case LedCommand_middleNight:
 				targetPattern = &nightLight{
