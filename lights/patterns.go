@@ -64,11 +64,14 @@ func (pat *sinWavePattern) tick(ledCount int) {
 		green := (math.Sin((float64(ledCount-i)/pat.rate + pat.offset)) + 1) / 2 * 255
 		pat.state[i] = colorF{red, green, 30}
 	}
-	pat.offset += 0.04
+	pat.offset += 0.02
 }
 
-func (_ *sinWavePattern) reset(col color)   {}
-func (pat *sinWavePattern) get(x int) color { return pat.state[x].toColor() }
+func (_ *sinWavePattern) reset(col color) {}
+
+func (pat *sinWavePattern) get(x int) color {
+	return pat.state[x].toColor()
+}
 
 // Twinkling star pattern
 type stars struct {
@@ -95,8 +98,36 @@ func (pat *stars) tick(ledCount int) {
 	}
 }
 
-func (_ *stars) reset(col color)   {}
-func (pat *stars) get(x int) color { return pat.state[x].toColor() }
+func (_ *stars) reset(col color) {}
+
+func (pat *stars) get(x int) color {
+	return pat.state[x].toColor()
+}
+
+// Rainbow (many colors but not really a rainbow). Scrolls constantly
+type rainbow struct {
+	offset float64
+}
+
+func (pat *rainbow) tick(ledCount int) {
+
+}
+
+func (_ *rainbow) reset(col color) {}
+
+func (pat *rainbow) get(x int) color {
+	sin, cos := math.Sincos(float64(x) / 50)
+	sin = (sin + 1) / 2
+	cos = (cos + 1) / 2
+
+	c := colorF{
+		r: 255 * sin,
+		g: 255 * cos,
+		b: 255 * sin * cos,
+	}
+
+	return c.toColor()
+}
 
 // HELPER FUNCTIONS
 func randRange(min int, max int) int {

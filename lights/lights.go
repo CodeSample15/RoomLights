@@ -49,15 +49,16 @@ const (
 
 var patterns []Pattern = []Pattern{
 	&sinWavePattern{
-		rate:  5,
+		rate:  4,
 		state: make([]colorF, LED_COUNT),
 	},
 	&stars{
-		createTime:      50 * time.Millisecond,
-		decayRate:       0.01,
+		createTime:      10 * time.Millisecond,
+		decayRate:       0.02,
 		backgroundColor: color{0, 20, 70},
 		state:           make([]colorF, LED_COUNT),
 	},
+	&rainbow{},
 }
 
 func NewStrip(pin int, brightness int) Strip {
