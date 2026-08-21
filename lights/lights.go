@@ -104,6 +104,7 @@ mainLoop:
 
 			case LedCommand_off:
 				targetPattern = &offPattern{}
+
 				transitionSpeed = 0.1
 				lightsOn = false
 
@@ -133,7 +134,10 @@ mainLoop:
 				break
 
 			case LedCommand_middleNight:
-				targetPattern = &nightLight{}
+				targetPattern = &nightLight{
+					nextPixelTime: 50 * time.Millisecond,
+				}
+				targetPattern.reset(color{})
 				transitionSpeed = 0.01
 			}
 		case <-updateTick:

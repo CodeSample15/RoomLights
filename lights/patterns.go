@@ -20,16 +20,35 @@ func (_ *offPattern) reset(col color)   {}
 func (_ *offPattern) get(x int) color   { return color{} }
 
 // Dim soft lighting for getting up late at night for bathroom
-type nightLight struct{}
+type nightLight struct {
+	nextPixelTime time.Duration
 
-func (_ *nightLight) tick(ledCount int) {}
-func (_ *nightLight) reset(col color)   {}
-func (_ *nightLight) get(x int) color {
-	return color{
-		r: 120,
-		g: 64,
-		b: 0,
+	lastPixel time.Time
+	currPixel int
+}
+
+func (pat *nightLight) tick(ledCount int) {
+	if time.Since(pat.lastPixel) > pat.nextPixelTime {
+		pat.lastPixel = time.Now()
+		pat.currPixel++
 	}
+}
+
+func (pat *nightLight) reset(col color) {
+	pat.lastPixel = time.Now()
+	pat.currPixel = 0
+}
+
+func (pat *nightLight) get(x int) color {
+	if x < pat.currPixel {
+		return color{
+			r: 220,
+			g: 185,
+			b: 0,
+		}
+	}
+
+	return color{}
 }
 
 // Cool sin wave thing that I came up with and reuse in every light strip project I do
