@@ -3,6 +3,7 @@ package lights
 import (
 	"context"
 	"fmt"
+	"math"
 	"time"
 
 	ws2811 "github.com/rpi-ws281x/rpi-ws281x-go"
@@ -15,9 +16,9 @@ type color struct {
 }
 
 type colorF struct {
-	r float32
-	g float32
-	b float32
+	r float64
+	g float64
+	b float64
 }
 
 type Strip interface {
@@ -42,13 +43,38 @@ const (
 	LedCommand_down        LedCommand = 3
 	LedCommand_middle      LedCommand = 4
 	LedCommand_middleNight LedCommand = 5
+
+	LED_COUNT = 300
 )
 
-func NewStrip(pin int, ledCount int, brightness int) Strip {
+var patterns []Pattern = []Pattern{
+	&sinWavePattern{
+		rate:  4,
+		state: make([]colorF, LED_COUNT),
+	},
+	&stars{
+		createTime:      10 * time.Millisecond,
+		decayRate:       0.02,
+		backgroundColor: color{0, 20, 70},
+		state:           make([]colorF, LED_COUNT),
+	},
+	&rainbow{},
+}
+
+var solidColors []Pattern = []Pattern{
+	&solidColor{color{220, 0, 127}},
+	&solidColor{color{127, 0, 124}},
+	&solidColor{color{0, 224, 213}},
+	&solidColor{color{6, 196, 60}},
+	&solidColor{color{133, 196, 6}},
+	&solidColor{color{196, 54, 6}},
+}
+
+func NewStrip(pin int, brightness int) Strip {
 	opt := ws2811.DefaultOptions
 	opt.Channels[0].GpioPin = pin
 	opt.Channels[0].Brightness = brightness
-	opt.Channels[0].LedCount = ledCount
+	opt.Channels[0].LedCount = LED_COUNT
 
 	dev, err := ws2811.MakeWS2811(&opt)
 	if err != nil {
@@ -59,18 +85,21 @@ func NewStrip(pin int, ledCount int, brightness int) Strip {
 	dev.Init()
 	return &strip{
 		device:   dev,
-		ledCount: ledCount,
+		ledCount: LED_COUNT,
 	}
 }
 
 func LedService(ctx context.Context, commands chan LedCommand, led Strip) {
 	defer led.Close()
 
-	var transition float32
-	var transitionSpeed float32
+	var transitionSpeed float64
 	updateTick := time.Tick(10 * time.Millisecond)
 
 	var targetPattern Pattern = &offPattern{}
+	patternIndex := 0
+	colorIndex := 0
+	lightsOn := false
+	patternMode := false
 	state := make([]colorF, led.LedCount())
 
 mainLoop:
@@ -79,40 +108,98 @@ mainLoop:
 		case <-ctx.Done():
 			break mainLoop
 		case com := <-commands:
-			transition = 0
-
 			switch com {
 			case LedCommand_on:
-				break
+				if patternMode {
+					targetPattern = patterns[patternIndex]
+				} else {
+					targetPattern = solidColors[colorIndex]
+				}
+
+				transitionSpeed = 0.1
+				lightsOn = true
+
 			case LedCommand_off:
 				targetPattern = &offPattern{}
+
 				transitionSpeed = 0.1
+				lightsOn = false
+
 			case LedCommand_up:
-				break
+				if patternMode {
+					patternIndex += 1
+					if patternIndex >= len(patterns) {
+						patternIndex = 0
+					}
+
+					if lightsOn {
+						targetPattern = patterns[patternIndex]
+						transitionSpeed = 0.1
+					}
+				} else {
+					colorIndex += 1
+					if colorIndex >= len(solidColors) {
+						colorIndex = 0
+					}
+
+					if lightsOn {
+						targetPattern = solidColors[colorIndex]
+						transitionSpeed = 0.1
+					}
+				}
+
 			case LedCommand_down:
-				break
+				if patternMode {
+					patternIndex -= 1
+					if patternIndex < 0 {
+						patternIndex = len(patterns) - 1
+					}
+
+					if lightsOn {
+						targetPattern = patterns[patternIndex]
+						transitionSpeed = 0.1
+					}
+				} else {
+					colorIndex -= 1
+					if colorIndex < 0 {
+						colorIndex = len(solidColors) - 1
+					}
+
+					if lightsOn {
+						targetPattern = solidColors[colorIndex]
+						transitionSpeed = 0.1
+					}
+				}
+
 			case LedCommand_middle:
-				break
+				patternMode = !patternMode
+				if patternMode {
+					targetPattern = patterns[patternIndex]
+				} else {
+					targetPattern = solidColors[colorIndex]
+				}
+
 			case LedCommand_middleNight:
-				targetPattern = &nightLight{}
-				transitionSpeed = 0.05
+				patternMode = !patternMode
+				targetPattern = &nightLight{
+					nextPixelTime: 2 * time.Millisecond,
+				}
+				targetPattern.reset(color{})
+				transitionSpeed = 0.08
 			}
 		case <-updateTick:
-			targetPattern.tick()
-
-			if transition < 1 {
-				transition += transitionSpeed
-			} else {
-				transition = 1
-			}
+			targetPattern.tick(led.LedCount())
 
 			for c := range led.LedCount() {
+				target := targetPattern.get(c)
+
 				if transitionSpeed == 0 {
-					led.SetColor(c, targetPattern.get(c))
+					state[c] = colorF{float64(target.r), float64(target.g), float64(target.b)}
 				} else {
-					state[c].diff(targetPattern.get(c), transitionSpeed)
-					led.SetColor(c, state[c].toColor())
+					state[c].diff(target, transitionSpeed)
 				}
+
+				led.SetColor(c, state[c].toColor())
 			}
 
 			led.Render()
@@ -156,16 +243,16 @@ func (col *color) toInt() uint32 {
 	return uint32(col.r)<<16 | uint32(col.g)<<8 | uint32(col.b)
 }
 
-func (col *colorF) diff(other color, speed float32) {
-	col.r += (float32(other.r) - col.r) * speed
-	col.g += (float32(other.g) - col.g) * speed
-	col.b += (float32(other.b) - col.b) * speed
+func (col *colorF) diff(other color, speed float64) {
+	col.r += (float64(other.r) - col.r) * speed
+	col.g += (float64(other.g) - col.g) * speed
+	col.b += (float64(other.b) - col.b) * speed
 }
 
 func (col *colorF) toColor() color {
 	return color{
-		r: uint8(col.r),
-		g: uint8(col.g),
-		b: uint8(col.b),
+		r: uint8(math.Max(0, math.Min(col.r, 255))),
+		g: uint8(math.Max(0, math.Min(col.g, 255))),
+		b: uint8(math.Max(0, math.Min(col.b, 255))),
 	}
 }
